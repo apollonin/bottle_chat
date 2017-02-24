@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html ng-app='chat'>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.2/angular.min.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body ng-controller='AppController'>
+
+
+<div class="container bootstrap snippet">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="portlet portlet-default">
+                <div class="portlet-heading">
+                    <div class="portlet-title">
+                        <h4><i class="fa fa-circle text-green"></i> <input type="text" ng-model='user.name' id='user_name'></h4>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="panel-collapse collapse in">
+                    
+                    <div id="chat_div" class="portlet-body chat-widget" style="overflow-y: auto; width: auto; height: 300px;">
+
+                    	<div ng-repeat='message in messages track by $index'>
+                    		<div class="row">
+	                            <div class="col-lg-12">
+	                                <div class="media">
+	                                    <a class="pull-left" href="#">
+	                                        <img class="media-object img-circle" src="http://lorempixel.com/30/30/people/1/" alt="">
+	                                    </a>
+	                                    <div class="media-body">
+	                                        <h4 class="media-heading">{{ user.name }}
+	                                            <span class="small pull-right">12:23 PM</span>
+	                                        </h4>
+	                                        <p>{{ message }}</p>
+	                                    </div>
+	                                </div>
+	                            </div>
+	                        </div>
+	                        <hr>	
+                    	</div>
+                    </div>
+                    
+                    <div class="portlet-footer">
+                        <form role="form" ng-submit='send()'>
+                            <div class="form-group">
+                                <input type='text' class="form-control" placeholder="Enter message..." ng-model='message'>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default pull-right">Send</button>
+                                <div class="clearfix"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-md-4 -->
+    </div>
+</div>                
+
+</body>
+</html>

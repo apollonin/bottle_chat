@@ -1,0 +1,19 @@
+version: '2'
+services:
+  
+  server:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - "./app:/app"
+    ports:
+      - "8081:8080"
+    command: python /app/server.py
+
+  client:
+    image: nginx
+    ports:
+      - "81:80" 
+    volumes:
+      - ./app:/usr/share/nginx/html
