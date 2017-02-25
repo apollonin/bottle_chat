@@ -11,7 +11,10 @@ chatApp.controller('AppController', ['$scope', function($scope){
 	$scope.messages = [];
 
 	$scope.send = function(){
-		ws.send($scope.message);
+		ws.send(JSON.stringify({
+			name: $scope.user.name,
+			message: $scope.message	
+		}));
 
 		$scope.message = '';
 	}
@@ -23,7 +26,20 @@ chatApp.controller('AppController', ['$scope', function($scope){
 	    };
 	    ws.onmessage = function (evt) {
 
-	    	$scope.messages.push(evt.data);
+	    	data = JSON.parse(evt.data);
+
+	    	if (data.type == 'message'){
+
+	    		$scope.messages.push(JSON.parse(data.data));
+
+	    	}else if (data.type == 'history'){
+
+	    		 angular.forEach(data.data, function(message){
+	    			$scope.messages.push(JSON.parse(message));
+	    		 })
+	    		 
+	    	}
+
 			$scope.$apply(); 
 
 			//scroll to bottom
