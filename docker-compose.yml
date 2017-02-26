@@ -12,14 +12,7 @@ services:
       - "8081:8080"
       - "9999:9999"
     command: python /app/server.py
-
-  client:
-    image: nginx
-    container_name: chat-client
-    ports:
-      - "81:80" 
-    volumes:
-      - ./app:/usr/share/nginx/html
+    
   mongodb:
     image: mongo:3.0.2
     container_name: chat-mongo
