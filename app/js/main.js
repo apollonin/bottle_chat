@@ -1,8 +1,10 @@
-let chatApp = angular.module('chat',[]);
+let chatApp = angular.module('chat',[]).config(function($interpolateProvider){
+    $interpolateProvider.startSymbol('||').endSymbol('||');
+});
 
-chatApp.controller('AppController', ['$scope', function($scope){
+chatApp.controller('AppController', ['$scope', '$http', function($scope, $http){
 
-	var ws;
+	var socket;
 
 	$scope.user = {
 		name: 'apollonin' 
@@ -11,7 +13,8 @@ chatApp.controller('AppController', ['$scope', function($scope){
 	$scope.messages = [];
 
 	$scope.send = function(){
-		ws.send(JSON.stringify({
+
+		socket.emit('chat', JSON.stringify({
 			name: $scope.user.name,
 			message: $scope.message	
 		}));
@@ -19,36 +22,39 @@ chatApp.controller('AppController', ['$scope', function($scope){
 		$scope.message = '';
 	}
 
-	function start(){
-		ws = new WebSocket("ws://localhost:8081/websocket");
-	    ws.onopen = function() {
-	        ws.send('getHistory');
-	    };
-	    ws.onmessage = function (evt) {
+	function start_socket(){
 
-	    	data = JSON.parse(evt.data);
+		// Create and connect socket
+    	socket = io.connect("", {'host': 'localhost', 'port': 9999});
 
-	    	if (data.type == 'message'){
+    	socket.emit('login', $scope.user.name);
 
-	    		$scope.messages.push(JSON.parse(data.data));
+    	socket.on('chat', function(message) {
+	        $scope.messages.push(JSON.parse(message));
 
-	    	}else if (data.type == 'history'){
+	        $scope.$apply(); 
 
-	    		 angular.forEach(data.data.messages, function(message){
+	        scrollChatToBottom();
+	    });
+	}
+
+	function getHistory(){
+		$http.get('http://localhost:8081/history')
+			.then(function(response){
+				angular.forEach(response.data.messages, function(message){
 	    			$scope.messages.push(message);
-	    		 })
+	    		 });
 
-	    	}
+				scrollChatToBottom();
+			});
+	}
 
-			$scope.$apply(); 
+	function scrollChatToBottom(){
+		var chat_div = document.getElementById("chat_div");
+		chat_div.scrollTop = chat_div.scrollHeight;
+	}
 
-			//scroll to bottom
-			var chat_div = document.getElementById("chat_div");
-			chat_div.scrollTop = chat_div.scrollHeight;
-	    };
-	};
-
-	start();
-
+	getHistory();
+	start_socket();
 
 }]);
