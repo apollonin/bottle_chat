@@ -7,8 +7,7 @@ RUN pip install bottle
 RUN pip install gevent
 RUN pip install gunicorn
 RUN pip install gevent-websocket
-RUN pip install pymongo
-
+RUN pip install bottle-mongo
 
 EXPOSE 8080
 

@@ -34,10 +34,10 @@ chatApp.controller('AppController', ['$scope', function($scope){
 
 	    	}else if (data.type == 'history'){
 
-	    		 angular.forEach(data.data, function(message){
-	    			$scope.messages.push(JSON.parse(message));
+	    		 angular.forEach(data.data.messages, function(message){
+	    			$scope.messages.push(message);
 	    		 })
-	    		 
+
 	    	}
 
 			$scope.$apply(); 

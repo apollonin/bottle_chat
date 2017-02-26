@@ -3,40 +3,24 @@ from gevent.pywsgi import WSGIServer
 from geventwebsocket import WebSocketError
 from geventwebsocket.handler import WebSocketHandler
 
-from pymongo import MongoClient
+from bottle.ext.mongo import MongoPlugin
 
 import json
-from bson import ObjectId
 
 from bson.json_util import dumps
 
-
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-# TODO. rework this to singleton
-class MongoConnection(object):
-    
-    __metaclass__ = Singleton
-
-    def getConnection(self):
-        client = MongoClient('mongodb', 27017)
-        return client
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
-
 app = Bottle()
 
+plugin = MongoPlugin(uri="mongodb://mongodb:27017", db="bottle", json_mongo=True)
+app.install(plugin)
+
+@app.route('/')
+def index():
+    return template('blank')
+
+
 @app.route('/websocket')
-def handle_websocket():
+def handle_websocket(mongodb):
     wsock = request.environ.get('wsgi.websocket')
     if not wsock:
         abort(400, 'Expected WebSocket request.')
@@ -47,7 +31,7 @@ def handle_websocket():
             if (message == 'getHistory'):
                 wsock.send(dumps({
                         'type': 'history',
-                        'data': getHistory()
+                        'data': getHistory(mongodb)
                     }))
             else:
                 wsock.send(dumps({
@@ -57,25 +41,22 @@ def handle_websocket():
 
                 #save to DB
                 message = json.loads(message)
-                client = MongoConnection().getConnection()
-                client.bottle.messages.insert_one(message).inserted_id
+                mongodb['messages'].insert(message)
 
         except WebSocketError:
             break
 
 @app.route('/history')
-def getHistory():
+def getHistory(mongodb):
 
-    client = MongoConnection().getConnection()
-
-    cursor = client.bottle.messages.find()
+    cursor = mongodb['messages'].find()
 
     messages = []
 
     for message in cursor:
-        messages.append(JSONEncoder().encode(message))
+        messages.append({'name': message['name'], 'message': message['message']})
 
-    return messages
+    return {'messages' : messages}
 
 server = WSGIServer(("0.0.0.0", 8080), app,
                     handler_class=WebSocketHandler)
